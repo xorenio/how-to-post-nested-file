@@ -1,13 +1,23 @@
 
+
+// SCRIPT SETUP
+//
+//
 const formData = require('form-data');
+const FormData = require('form-data');
 const fs = require('fs');
 const axios = require('axios');
 //.default;
+//
+//
+// SCRIPT SETUP
 
-var form = formData();
 
-form.append('configutaor_id', 21)
 
+
+// SCRIPT DATA
+//
+//
 const data = [
      {
         section_id: 1, // info
@@ -55,11 +65,78 @@ const data = [
           ],
       }
 ];
+//
+//
+//SCRIPT DATA
 
 
-form.append('workflow[]', data)
 
+
+// SCRIPT FUNCTION
+//
+// OR USE THIS https://www.npmjs.com/package/object-to-formdata
+function obj2FormData(obj, formData = new FormData()){
+
+    this.formData = formData;
+
+    this.createFormData = function(obj, subKeyStr = ''){
+        for(let i in obj){
+            let value          = obj[i];
+            let subKeyStrTrans = subKeyStr ? subKeyStr + '[' + i + ']' : i;
+
+            if(typeof(value) === 'string' || typeof(value) === 'number'){
+
+                this.formData.append(subKeyStrTrans, value);
+
+            } else if(typeof(value) === 'object'){
+
+                this.createFormData(value, subKeyStrTrans);
+
+            }
+        }
+    }
+
+    this.createFormData(obj);
+
+    return this.formData;
+}
+//
+//
+// SCRIPT FUNCTION
+
+
+// SCRIPT RUNTIME
+//
+//
+
+let form = obj2FormData({
+    configutaor_id : 21,
+    workflow : data
+});
+console.log("==========================")
+console.log("   FORM DATA - NO FILE")
+console.log("==========================")
+console.log("form", form)
+
+
+// APPEND FILE
+//
+//
+form.append('workflow[0][data][0][file]', fs.createReadStream('./IMAGE/JOHNS_AVATAR.jpg'))
+//
+//
+// APPEND FILE
+
+
+
+console.log("==========================")
+console.log("   FORM DATA - WITH FILE")
+console.log("==========================")
 console.log(form)
+
+console.log("==========================")
+console.log(" XHR ERROR - NO BAKCEND ")
+console.log("==========================")
 
 axios({
  'METHOD': "PATCH",
@@ -69,3 +146,6 @@ axios({
   "Content-Type": "multipar/data-form"
  },
 })
+//
+//
+// SCRIPT RUNTIME
